@@ -10,6 +10,7 @@ import shutil
 from dbcollection.datasets import BaseDataset
 from .classification import Classification
 
+
 urls = (
     "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
     "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz",
