@@ -70,6 +70,11 @@ test-utils:
 	make build
 	pipenv run pytest -v dbcollection/tests/utils
 
+.PHONY: test-datasets
+test-datasets:
+	make build
+	pipenv run pytest -v dbcollection/tests/datasets
+
 .PHONY: lint
 lint:
 	pipenv run tox -e flake8
@@ -77,6 +82,7 @@ lint:
 .PHONY: urls_check
 urls_check:
 	pipenv run tox -e urls_check_health
+
 
 ##########
 # Deploy
