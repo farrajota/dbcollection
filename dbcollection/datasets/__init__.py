@@ -15,7 +15,7 @@ from dbcollection.utils.url import download_extract_all
 
 
 class BaseDataset(object):
-    """ Base class for download/processing a dataset.
+    """Base class for download/processing a dataset.
 
     Parameters
     ----------
@@ -25,8 +25,8 @@ class BaseDataset(object):
         Path to the cache file
     extract_data : bool, optional
         Extracts the downloaded files if they are compacted.
-    verbose : bool
-        Be verbose
+    verbose : bool, optional
+         Displays text information to the screen (if true).
 
     Attributes
     ----------
@@ -34,46 +34,39 @@ class BaseDataset(object):
         Path to the data directory.
     cache_path : str
         Path to the cache file
-    extract_data : bool, optional
+    extract_data : bool
         Extracts the downloaded files if they are compacted.
     verbose : bool
-        Be verbose
+        Displays text information to the screen (if true).
     urls : list
-        List of URL links to download.
+        List of URL paths to download.
     keywords : list
-        List of keywords.
+        List of keywords to classify datasets.
     tasks : dict
-        Dataset's tasks.
+        Dataset's tasks for processing.
     default_task : str
         Default task name.
 
     """
 
-    # download url
     urls = ()  # list of urls to download
-
-    # some keywords. These are used to classify datasets for easier
-    # categorization in the cache file.
-    keywords = ()
-
-    # init tasks
+    keywords = ()  # List of keywords to classify/categorize datasets in the cache.
     tasks = {}  # dictionary of available tasks to process
-    # Example: tasks = {'classification':Classification}
-    default_task = ''  # Should define a default class!
-    # Example: default_task='classification'
+                # Example: tasks = {'classification':Classification}
+    default_task = ''  # Defines the default class!
+                       # Example: default_task='classification'
 
     def __init__(self, data_path, cache_path, extract_data=True, verbose=True):
         """Initialize class."""
-        assert data_path
-        assert cache_path
+        assert data_path, "Must insert a valid data path"
+        assert cache_path, "Must insert a valid cache path"
         self.data_path = data_path
         self.cache_path = cache_path
         self.extract_data = extract_data
         self.verbose = verbose
 
     def download(self):
-        """
-        Download and extract files to disk.
+        """Downloads and extract files to disk.
 
         Returns
         -------
@@ -81,55 +74,10 @@ class BaseDataset(object):
             A list of keywords.
 
         """
-        # download + extract data and remove temporary files
-        download_extract_all(self.urls, self.data_path, self.extract_data, self.verbose)
-
-        return self.keywords
-
-    def parse_task_name(self, task):
-        """Parses the task string to look for key suffixes.
-
-        Parameters
-        ----------
-        task : str
-            Task name.
-
-        Returns
-        -------
-        str
-            Returns a task name without the '_s' suffix.
-
-        """
-        if task.endswith('_s'):
-            return task[:-2], '_s'
-        else:
-            return task, None
-
-    def get_task_constructor(self, task):
-        """Returns the class constructor for the input task.
-
-        Parameters
-        ----------
-        task : str
-            Task name.
-
-        Returns
-        -------
-        str
-            Task name.
-        str
-            Task's ending suffix (if any).
-        BaseTask
-            Constructor to process the metadata of a task.
-
-        """
-        if task == '':
-            task_, suffix = self.default_task, None
-        elif task == 'default':
-            task_, suffix = self.default_task, None
-        else:
-            task_, suffix = self.parse_task_name(task)
-        return task_, suffix, self.tasks[task_]
+        download_extract_all(urls=self.urls,
+                             dir_save=self.data_path,
+                             extract_data=self.extract_data,
+                             verbose=self.verbose)
 
     def process(self, task='default'):
         """Processes the metadata of a task.
@@ -137,7 +85,7 @@ class BaseDataset(object):
         Parameters
         ----------
         task : str, optional
-            Task name.
+            Name of the task.
 
         Returns
         -------
@@ -145,15 +93,54 @@ class BaseDataset(object):
             Returns a dictionary with the task name as key and the filename as value.
 
         """
-        task_, suffix, task_constructor = self.get_task_constructor(task)
+        task_ = self.parse_task_name(task)
         if self.verbose:
-            print('\nProcessing \'{}\' task:'.format(task_))
-        task_loader = task_constructor(self.data_path, self.cache_path, suffix, self.verbose)
-        task_filename = task_loader.run()
-        if suffix:
-            return {task_ + suffix: task_filename}
+            print("\nProcessing '{}' task:".format(task_))
+        hdf5_filename = self.process_metadata(task_)
+        return {task_: hdf5_filename}
+
+    def parse_task_name(self, task):
+        """Parses the task name to a valid name."""
+        if task == '' or task == 'default':
+            return self.default_task
         else:
-            return {task_: task_filename}
+            return task
+
+    def process_metadata(self, task):
+        """Processes the metadata for a task.
+
+        Parameters
+        ----------
+        task : str
+            Name of the task.
+
+        Returns
+        -------
+        str
+            File name + path of the resulting HDFR5 metadata file of the task.
+        """
+        constructor = self.get_task_constructor(task)
+        processer = constructor(data_path=self.data_path,
+                                cache_path=self.cache_path,
+                                verbose=self.verbose)
+        return processer.run()
+
+    def get_task_constructor(self, task):
+        """Returns the class constructor for the input task.
+
+        Parameters
+        ----------
+        task : str
+            Name of the task.
+
+        Returns
+        -------
+        BaseTask
+            Constructor to process the metadata of a task.
+
+        """
+        assert task
+        return self.tasks[task]
 
 
 class BaseTask(object):
