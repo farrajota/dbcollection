@@ -192,3 +192,19 @@ class TestBaseTask:
         filepath = mock_task_class.get_hdf5_save_filename()
 
         assert filepath == os.path.join('/path/to/cache', 'classification.h5')
+
+    def test_run(self, mocker, mock_task_class):
+        mock_setup_manager = mocker.patch.object(BaseTask, "setup_manager_hdf5")
+        mock_load_data = mocker.patch.object(BaseTask, "load_data", return_value={})
+        mock_process = mocker.patch.object(BaseTask, "process_metadata")
+        mock_save_data = mocker.patch.object(BaseTask, "save_data_to_disk")
+        mock_teardown_manager = mocker.patch.object(BaseTask, "teardown_manager_hdf5")
+
+        filename = mock_task_class.run()
+
+        assert mock_setup_manager.called
+        assert mock_load_data.called
+        assert mock_process.called
+        assert mock_save_data.called
+        assert mock_teardown_manager.called
+        assert filename == mock_task_class.hdf5_filepath
