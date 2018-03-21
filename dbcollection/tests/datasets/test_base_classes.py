@@ -208,3 +208,6 @@ class TestBaseTask:
         assert mock_save_data.called
         assert mock_teardown_manager.called
         assert filename == mock_task_class.hdf5_filepath
+
+    def test_setup_manager_hdf5(self, mocker, mock_task_class):
+        pass  # Todo
