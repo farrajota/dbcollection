@@ -211,3 +211,6 @@ class TestBaseTask:
 
     def test_setup_manager_hdf5(self, mocker, mock_task_class):
         pass  # Todo
+
+    def test_load_data(self, mocker, mock_task_class):
+        mock_task_class.load_data()
