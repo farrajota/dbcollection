@@ -144,7 +144,7 @@ class BaseDataset(object):
 
 
 class BaseTask(object):
-    """Base class for processing a task of a dataset.
+    """Base class for processing the metadata of a task of a dataset.
 
     Parameters
     ----------
@@ -152,10 +152,8 @@ class BaseTask(object):
         Path to the data directory.
     cache_path : str
         Path to the cache file
-    suffix : str, optional
-        Suffix to select optional properties for a task.
     verbose : bool, optional
-        Be verbose.
+        Displays text information to the screen (if true).
 
     Attributes
     ----------
@@ -163,113 +161,140 @@ class BaseTask(object):
         Path to the data directory.
     cache_path : str
         Path to the cache file
-    suffix : str, optional
-        Suffix to select optional properties for a task.
-    verbose : bool, optional
-        Be verbose.
+    verbose : bool
+        Displays text information to the screen (if true).
     filename_h5 : str
-        hdf5 metadata file name.
+        Name of the HDF5 file.
+    hdf5_filepath : str
+        File name + path of the HDF5 metadata file in disk.
 
     """
 
-    # name of the task file
-    filename_h5 = 'task'
+    filename_h5 = ''  # name of the task file
 
-    def __init__(self, data_path, cache_path, suffix=None, verbose=True):
+    def __init__(self, data_path, cache_path, verbose=True):
         """Initialize class."""
-        assert data_path
-        assert cache_path
+        assert data_path, "Must insert a valid data path"
+        assert cache_path, "Must insert a valid cache path"
         self.cache_path = cache_path
         self.data_path = data_path
-        self.suffix = suffix
         self.verbose = verbose
+        self.hdf5_filepath = self.get_hdf5_save_filename()
+        self.hdf5_manager = None
+
+    def get_hdf5_save_filename(self):
+        """Builds the HDF5 file name + path on disk."""
+        return os.path.join(self.cache_path, self.filename_h5 + '.h5')
+
+    def run(self):
+        """Main Method. Runs the task metadata processing.
+
+        It creates an HDF5 file in disk to store the resulting
+        subgroups of the dataset's set partitions (e.g., train/val/test/etc.).
+        Then, it loads the dataset's raw metadata from disk into memory as a
+        generator, retrieves the data fields obtained in the processing stage
+        and saves them into an HDF5 file in disk.
+
+        Returns
+        -------
+        str
+            File name + path of the task's HDF5 metadata file.
+        """
+        self.setup_manager_hdf5()
+        data_generator = self.load_data()
+        self.process_metadata(data_generator)
+        self.save_data_to_disk()
+        self.teardown_manager_hdf5()
+        return self.hdf5_filepath
+
+    def setup_manager_hdf5(self):
+        """Sets up the metadata manager to store the processed data to disk."""
+        self.hdf5_manager = self.set_hdf5_manager(self.hdf5_filepath)
+        if self.verbose:
+            print('\n==> Storing metadata to file: {}'.format(self.hdf5_filepath))
+
+    def set_hdf5_manager(self, hdf5_filepath):
+        """Sets a MetadataManager object to manage the metadata saving scheme to disk."""
+        pass
 
     def load_data(self):
-        """
-        Load data of the dataset (create a generator).
+        """Loads the dataset's (meta)data from disk (create a generator).
 
         Load data from annnotations and split it to corresponding
         sets (train, val, test, etc.)
 
-        """
-        pass  # stub
-
-    def add_data_to_source(self, hdf5_handler, data, set_name=None):
-        """
-        Store data annotations in a nested tree fashion.
-
-        It closely follows the tree structure of the data.
-
-        Parameters
-        ----------
-        hdf5_handler : h5py._hl.group.Group
-            hdf5 group object handler.
-        data : list/dict
-            List or dict containing the data annotations of a particular set or sets.
-        set_name : str
-            Set name.
+        Returns
+        -------
+        generator
+            A sequence of dictionary objects with a key-value pair
+            with the name of the set split and the data.
 
         """
         pass  # stub
 
-    def add_data_to_default(self, handler, data, set_name=None):
-        """
-        Add data of a set to the default group.
-
-        For each field, the data is organized into a single big matrix.
-
-        Parameters
-        ----------
-        hdf5_handler : h5py._hl.group.Group
-            hdf5 group object handler.
-        data : list/dict
-            List or dict containing the data annotations of a particular set or sets.
-        set_name : str
-            Set name.
-
-        """
-        pass  # stub
-
-    def process_metadata(self):
-        """
-        Process metadata and store it in a hdf5 file.
-        """
-
-        # create/open hdf5 file with subgroups for train/val/test
-        if self.suffix:
-            file_name = os.path.join(self.cache_path, self.filename_h5 + self.suffix + '.h5')
-        else:
-            file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
-        fileh5 = h5py.File(file_name, 'w', libver='latest')
-
-        if self.verbose:
-            print('\n==> Storing metadata to file: {}'.format(file_name))
-
-        # setup data generator
-        data_gen = self.load_data()
-
-        for data in data_gen:
+    def process_metadata(self, data_generator):
+        """Processes the dataset's (meta)data and stores it into an HDF5 file."""
+        for data in data_generator:
             for set_name in data:
-
                 if self.verbose:
                     print('\nSaving set metadata: {}'.format(set_name))
+                set_group = self.hdf5_create_group(set_name)
+                self.set_data_fields_to_save(set_group, data[set_name], set_name)
+                set_group_raw = self.hdf5_create_group(set_name + '/raw')
+                self.save_raw_metadata_to_hdf5(set_group_raw, data[set_name], set_name)
 
-                # add data to the **source** group
-                if self.suffix is '_s':
-                    sourceg = fileh5.create_group(set_name + '/source')
-                    self.add_data_to_source(sourceg, data[set_name], set_name)
+    def hdf5_create_group(self, group_name):
+        """Creates a group in the HDF5 file.
 
-                # add data to the **default** group
-                defaultg = fileh5.create_group(set_name)
-                self.add_data_to_default(defaultg, data[set_name], set_name)
+        Parameters
+        ----------
+        group_name : str
+            Name of the group to be created in the HDF5 file.
 
-        # close file
-        fileh5.close()
+        """
+        pass
 
-        # return information of the task + cache file
-        return file_name
+    def set_data_fields_to_save(self, hdf5_manager, data, set_name):
+        """Sets up which data fields to save in the HDF5 metadata file for a given set.
 
-    def run(self):
-        """Run task processing."""
-        filename = self.process_metadata()
-        return filename
+        All fields set in this method are organized as a single big matrix.
+        This results in much faster data retrieval than by transversing nested
+        groups + datasets in an HDF5 file.
+
+        Parameters
+        ----------
+        hdf5_handler : TODO
+            hdf5 group object handler.
+        data : dict
+            Dictionary containing the data annotations of a set split.
+        set_name : str
+            Name of the set split.
+
+        """
+        pass  # stub
+
+    def save_raw_metadata_to_hdf5(self, hdf5_manager, data, set_name):
+        """Saves the dataset's metadata in its raw (original) format inside the HDF5 file.
+
+        Most datasets are set as nested trees of files + directories.
+        Here, the metadata of a dataset is stored in this fashion,
+        closely following the tree structure of the data.
+
+        Parameters
+        ----------
+        hdf5_handler : TODO
+            hdf5 group object handler.
+        data : dict
+            Dictionary containing the data annotations of a set split.
+        set_name : str
+            Name of the set split.
+
+        """
+        pass  # stub
+
+    def save_data_to_disk(self):
+        pass
+
+    def teardown_manager_hdf5(self):
+        """Sets up the MetadataManager object to manage the metadata save process to disk."""
+        self.hdf5_manager.close()
