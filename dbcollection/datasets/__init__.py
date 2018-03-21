@@ -209,13 +209,9 @@ class BaseTask(object):
 
     def setup_manager_hdf5(self):
         """Sets up the metadata manager to store the processed data to disk."""
-        self.hdf5_manager = self.set_hdf5_manager(self.hdf5_filepath)
         if self.verbose:
             print('\n==> Storing metadata to file: {}'.format(self.hdf5_filepath))
-
-    def set_hdf5_manager(self, hdf5_filepath):
-        """Sets a MetadataManager object to manage the metadata saving scheme to disk."""
-        pass
+        self.hdf5_manager = None
 
     def load_data(self):
         """Loads the dataset's (meta)data from disk (create a generator).
