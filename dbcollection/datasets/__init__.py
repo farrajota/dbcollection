@@ -158,9 +158,9 @@ class BaseTask(object):
     Attributes
     ----------
     data_path : str
-        Path to the data directory.
+        Path to the data directory of the dataset.
     cache_path : str
-        Path to the cache file
+        Path to store the HDF5 metadata file of a dataset in the cache directory.
     verbose : bool
         Displays text information to the screen (if true).
     filename_h5 : str
