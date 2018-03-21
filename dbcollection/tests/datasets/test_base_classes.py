@@ -135,13 +135,43 @@ class TestBaseTask:
     """Unit tests for the BaseTask class."""
 
     def test_init_with_all_input_args(self, mocker):
-        pass
+        mock_get_filename = mocker.patch.object(BaseTask, "get_hdf5_save_filename", return_value='/path/to/hdf5/file.h5')
+        data_path = '/path/to/data'
+        cache_path = '/path/to/cache'
+        verbose = True
+
+        task_manager = BaseTask(data_path=data_path,
+                                cache_path=cache_path,
+                                verbose=verbose)
+
+        assert mock_get_filename.called
+        assert task_manager.data_path == '/path/to/data'
+        assert task_manager.cache_path == '/path/to/cache'
+        assert task_manager.verbose == True
+        assert task_manager.hdf5_filepath == '/path/to/hdf5/file.h5'
+        assert task_manager.filename_h5 == ''
+        assert task_manager.hdf5_manager == None
 
     def test_init_withouth_optional_input_args(self, mocker):
-        pass
+        mock_get_filename = mocker.patch.object(BaseTask, "get_hdf5_save_filename", return_value='/path/to/hdf5/file.h5')
+        data_path = '/path/to/data'
+        cache_path = '/path/to/cache'
+
+        task_manager = BaseTask(data_path=data_path,
+                                cache_path=cache_path)
+
+        assert mock_get_filename.called
+        assert task_manager.data_path == '/path/to/data'
+        assert task_manager.cache_path == '/path/to/cache'
+        assert task_manager.verbose == True
+        assert task_manager.hdf5_filepath == '/path/to/hdf5/file.h5'
+        assert task_manager.filename_h5 == ''
+        assert task_manager.hdf5_manager == None
 
     def test_init__raises_error_no_input_args(self, mocker):
-        pass
+        with pytest.raises(TypeError):
+            BaseTask()
 
     def test_init__raises_error_too_many_input_args(self, mocker):
-        pass
+        with pytest.raises(TypeError):
+            BaseTask('/path/to/data', '/path/to/cache', False, 'extra_input')
