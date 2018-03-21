@@ -3,6 +3,7 @@ Test the base classes for managing datasets and tasks.
 """
 
 
+import os
 import pytest
 
 from dbcollection.datasets import BaseDataset, BaseTask
@@ -131,6 +132,15 @@ class TestBaseDataset:
         assert result == 'some_data'
 
 
+@pytest.fixture()
+def mock_task_class(test_data):
+    return BaseTask(
+        data_path=test_data["data_path"],
+        cache_path=test_data["cache_path"],
+        verbose=test_data["verbose"]
+    )
+
+
 class TestBaseTask:
     """Unit tests for the BaseTask class."""
 
@@ -175,3 +185,10 @@ class TestBaseTask:
     def test_init__raises_error_too_many_input_args(self, mocker):
         with pytest.raises(TypeError):
             BaseTask('/path/to/data', '/path/to/cache', False, 'extra_input')
+
+    def test_get_hdf5_save_filename(self, mocker, mock_task_class):
+        mock_task_class.filename_h5 = 'classification'
+
+        filepath = mock_task_class.get_hdf5_save_filename()
+
+        assert filepath == os.path.join('/path/to/cache', 'classification.h5')
