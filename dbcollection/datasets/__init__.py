@@ -13,8 +13,10 @@ import h5py
 
 from dbcollection.utils.url import download_extract_all
 
-
 class BaseDataset(object):
+    pass
+
+class BaseDatasetNew(object):
     """Base class for download/processing a dataset.
 
     Parameters
