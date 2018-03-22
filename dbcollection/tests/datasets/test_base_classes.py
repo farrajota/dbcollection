@@ -263,3 +263,7 @@ class TestBaseTask:
     def test_save_raw_metadata_to_hdf5__raises_error_missing_one_input_arg(self, mocker, mock_task_class):
         with pytest.raises(TypeError):
             mock_task_class.save_raw_metadata_to_hdf5({}, ['dummy', 'data'])
+
+    def test_save_data_to_disk(self, mocker, mock_task_class):
+        pass
+
