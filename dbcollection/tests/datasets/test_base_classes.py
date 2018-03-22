@@ -233,3 +233,18 @@ class TestBaseTask:
 
     def test_hdf5_create_group(self, mocker, mock_task_class):
         pass  # Todo
+
+    def test_set_data_fields_to_save(self, mocker, mock_task_class):
+        hdf5_manager = {}
+        data = ['dummy', 'data']
+        set_name = 'sample_set'
+
+        mock_task_class.set_data_fields_to_save(hdf5_manager, data, set_name)
+
+    def test_set_data_fields_to_save__raises_error_no_input_args(self, mocker, mock_task_class):
+        with pytest.raises(TypeError):
+            mock_task_class.set_data_fields_to_save()
+
+    def test_set_data_fields_to_save__raises_error_missing_one_input_arg(self, mocker, mock_task_class):
+        with pytest.raises(TypeError):
+            mock_task_class.set_data_fields_to_save({}, ['dummy', 'data'])
