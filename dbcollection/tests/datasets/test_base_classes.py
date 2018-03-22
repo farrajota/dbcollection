@@ -248,3 +248,18 @@ class TestBaseTask:
     def test_set_data_fields_to_save__raises_error_missing_one_input_arg(self, mocker, mock_task_class):
         with pytest.raises(TypeError):
             mock_task_class.set_data_fields_to_save({}, ['dummy', 'data'])
+
+    def test_save_raw_metadata_to_hdf5(self, mocker, mock_task_class):
+        hdf5_manager = {}
+        data = ['dummy', 'data']
+        set_name = 'sample_set'
+
+        mock_task_class.save_raw_metadata_to_hdf5(hdf5_manager, data, set_name)
+
+    def test_save_raw_metadata_to_hdf5__raises_error_no_input_args(self, mocker, mock_task_class):
+        with pytest.raises(TypeError):
+            mock_task_class.save_raw_metadata_to_hdf5()
+
+    def test_save_raw_metadata_to_hdf5__raises_error_missing_one_input_arg(self, mocker, mock_task_class):
+        with pytest.raises(TypeError):
+            mock_task_class.save_raw_metadata_to_hdf5({}, ['dummy', 'data'])
