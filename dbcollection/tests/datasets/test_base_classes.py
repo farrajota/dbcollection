@@ -214,3 +214,19 @@ class TestBaseTask:
 
     def test_load_data(self, mocker, mock_task_class):
         mock_task_class.load_data()
+
+    def test_process_metadata(self, mocker, mock_task_class):
+        mock_create_group = mocker.patch.object(BaseTask, "hdf5_create_group", return_value={})
+        mock_set_data = mocker.patch.object(BaseTask, "set_data_fields_to_save")
+        mock_save_raw = mocker.patch.object(BaseTask, "save_raw_metadata_to_hdf5")
+
+        def sample_generator():
+            yield {'train': ['dummy', 'data']}
+            yield {'test': ['dummy', 'data']}
+        generator = sample_generator()
+
+        mock_task_class.process_metadata(generator)
+
+        assert mock_create_group.called
+        assert mock_set_data.called
+        assert mock_save_raw.called
