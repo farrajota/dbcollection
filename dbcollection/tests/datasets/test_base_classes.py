@@ -6,7 +6,7 @@ Test the base classes for managing datasets and tasks.
 import os
 import pytest
 
-from dbcollection.datasets import BaseDatasetNew, BaseTask
+from dbcollection.datasets import BaseDatasetNew, BaseTaskNew
 
 
 @pytest.fixture()
@@ -134,23 +134,23 @@ class TestBaseDatasetNew:
 
 @pytest.fixture()
 def mock_task_class(test_data):
-    return BaseTask(
+    return BaseTaskNew(
         data_path=test_data["data_path"],
         cache_path=test_data["cache_path"],
         verbose=test_data["verbose"]
     )
 
 
-class TestBaseTask:
-    """Unit tests for the BaseTask class."""
+class TestBaseTaskNew:
+    """Unit tests for the BaseTaskNew class."""
 
     def test_init_with_all_input_args(self, mocker):
-        mock_get_filename = mocker.patch.object(BaseTask, "get_hdf5_save_filename", return_value='/path/to/hdf5/file.h5')
+        mock_get_filename = mocker.patch.object(BaseTaskNew, "get_hdf5_save_filename", return_value='/path/to/hdf5/file.h5')
         data_path = '/path/to/data'
         cache_path = '/path/to/cache'
         verbose = True
 
-        task_manager = BaseTask(data_path=data_path,
+        task_manager = BaseTaskNew(data_path=data_path,
                                 cache_path=cache_path,
                                 verbose=verbose)
 
@@ -163,11 +163,11 @@ class TestBaseTask:
         assert task_manager.hdf5_manager == None
 
     def test_init_withouth_optional_input_args(self, mocker):
-        mock_get_filename = mocker.patch.object(BaseTask, "get_hdf5_save_filename", return_value='/path/to/hdf5/file.h5')
+        mock_get_filename = mocker.patch.object(BaseTaskNew, "get_hdf5_save_filename", return_value='/path/to/hdf5/file.h5')
         data_path = '/path/to/data'
         cache_path = '/path/to/cache'
 
-        task_manager = BaseTask(data_path=data_path,
+        task_manager = BaseTaskNew(data_path=data_path,
                                 cache_path=cache_path)
 
         assert mock_get_filename.called
@@ -180,11 +180,11 @@ class TestBaseTask:
 
     def test_init__raises_error_no_input_args(self, mocker):
         with pytest.raises(TypeError):
-            BaseTask()
+            BaseTaskNew()
 
     def test_init__raises_error_too_many_input_args(self, mocker):
         with pytest.raises(TypeError):
-            BaseTask('/path/to/data', '/path/to/cache', False, 'extra_input')
+            BaseTaskNew('/path/to/data', '/path/to/cache', False, 'extra_input')
 
     def test_get_hdf5_save_filename(self, mocker, mock_task_class):
         mock_task_class.filename_h5 = 'classification'
@@ -194,11 +194,11 @@ class TestBaseTask:
         assert filepath == os.path.join('/path/to/cache', 'classification.h5')
 
     def test_run(self, mocker, mock_task_class):
-        mock_setup_manager = mocker.patch.object(BaseTask, "setup_manager_hdf5")
-        mock_load_data = mocker.patch.object(BaseTask, "load_data", return_value={})
-        mock_process = mocker.patch.object(BaseTask, "process_metadata")
-        mock_save_data = mocker.patch.object(BaseTask, "save_data_to_disk")
-        mock_teardown_manager = mocker.patch.object(BaseTask, "teardown_manager_hdf5")
+        mock_setup_manager = mocker.patch.object(BaseTaskNew, "setup_manager_hdf5")
+        mock_load_data = mocker.patch.object(BaseTaskNew, "load_data", return_value={})
+        mock_process = mocker.patch.object(BaseTaskNew, "process_metadata")
+        mock_save_data = mocker.patch.object(BaseTaskNew, "save_data_to_disk")
+        mock_teardown_manager = mocker.patch.object(BaseTaskNew, "teardown_manager_hdf5")
 
         filename = mock_task_class.run()
 
@@ -216,9 +216,9 @@ class TestBaseTask:
         mock_task_class.load_data()
 
     def test_process_metadata(self, mocker, mock_task_class):
-        mock_create_group = mocker.patch.object(BaseTask, "hdf5_create_group", return_value={})
-        mock_set_data = mocker.patch.object(BaseTask, "set_data_fields_to_save")
-        mock_save_raw = mocker.patch.object(BaseTask, "save_raw_metadata_to_hdf5")
+        mock_create_group = mocker.patch.object(BaseTaskNew, "hdf5_create_group", return_value={})
+        mock_set_data = mocker.patch.object(BaseTaskNew, "set_data_fields_to_save")
+        mock_save_raw = mocker.patch.object(BaseTaskNew, "save_raw_metadata_to_hdf5")
 
         def sample_generator():
             yield {'train': ['dummy', 'data']}
