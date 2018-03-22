@@ -230,3 +230,6 @@ class TestBaseTask:
         assert mock_create_group.called
         assert mock_set_data.called
         assert mock_save_raw.called
+
+    def test_hdf5_create_group(self, mocker, mock_task_class):
+        pass  # Todo
