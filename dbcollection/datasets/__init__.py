@@ -285,7 +285,135 @@ class BaseDatasetNew(object):
 
 
 class BaseTask(object):
-    pass
+    """Base class for processing a task of a dataset.
+
+    Parameters
+    ----------
+    data_path : str
+        Path to the data directory.
+    cache_path : str
+        Path to the cache file
+    suffix : str, optional
+        Suffix to select optional properties for a task.
+    verbose : bool, optional
+        Be verbose.
+
+    Attributes
+    ----------
+    data_path : str
+        Path to the data directory.
+    cache_path : str
+        Path to the cache file
+    suffix : str, optional
+        Suffix to select optional properties for a task.
+    verbose : bool, optional
+        Be verbose.
+    filename_h5 : str
+        hdf5 metadata file name.
+
+    """
+
+    # name of the task file
+    filename_h5 = 'task'
+
+    def __init__(self, data_path, cache_path, suffix=None, verbose=True):
+        """Initialize class."""
+        assert data_path
+        assert cache_path
+        self.cache_path = cache_path
+        self.data_path = data_path
+        self.suffix = suffix
+        self.verbose = verbose
+
+    def load_data(self):
+        """
+        Load data of the dataset (create a generator).
+
+        Load data from annnotations and split it to corresponding
+        sets (train, val, test, etc.)
+
+        """
+        pass  # stub
+
+    def add_data_to_source(self, hdf5_handler, data, set_name=None):
+        """
+        Store data annotations in a nested tree fashion.
+
+        It closely follows the tree structure of the data.
+
+        Parameters
+        ----------
+        hdf5_handler : h5py._hl.group.Group
+            hdf5 group object handler.
+        data : list/dict
+            List or dict containing the data annotations of a particular set or sets.
+        set_name : str
+            Set name.
+
+        """
+        pass  # stub
+
+    def add_data_to_default(self, handler, data, set_name=None):
+        """
+        Add data of a set to the default group.
+
+        For each field, the data is organized into a single big matrix.
+
+        Parameters
+        ----------
+        hdf5_handler : h5py._hl.group.Group
+            hdf5 group object handler.
+        data : list/dict
+            List or dict containing the data annotations of a particular set or sets.
+        set_name : str
+            Set name.
+
+        """
+        pass  # stub
+
+    def process_metadata(self):
+        """
+        Process metadata and store it in a hdf5 file.
+        """
+
+        # create/open hdf5 file with subgroups for train/val/test
+        if self.suffix:
+            file_name = os.path.join(self.cache_path, self.filename_h5 + self.suffix + '.h5')
+        else:
+            file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
+        fileh5 = h5py.File(file_name, 'w', libver='latest')
+
+        if self.verbose:
+            print('\n==> Storing metadata to file: {}'.format(file_name))
+
+        # setup data generator
+        data_gen = self.load_data()
+
+        for data in data_gen:
+            for set_name in data:
+
+                if self.verbose:
+                    print('\nSaving set metadata: {}'.format(set_name))
+
+                # add data to the **source** group
+                if self.suffix is '_s':
+                    sourceg = fileh5.create_group(set_name + '/source')
+                    self.add_data_to_source(sourceg, data[set_name], set_name)
+
+                # add data to the **default** group
+                defaultg = fileh5.create_group(set_name)
+                self.add_data_to_default(defaultg, data[set_name], set_name)
+
+        # close file
+        fileh5.close()
+
+        # return information of the task + cache file
+        return file_name
+
+    def run(self):
+        """Run task processing."""
+        filename = self.process_metadata()
+        return filename
 
 
 class BaseTaskNew(object):
