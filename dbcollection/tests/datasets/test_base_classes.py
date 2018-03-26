@@ -197,7 +197,6 @@ class TestBaseTaskNew:
         mock_setup_manager = mocker.patch.object(BaseTaskNew, "setup_manager_hdf5")
         mock_load_data = mocker.patch.object(BaseTaskNew, "load_data", return_value={})
         mock_process = mocker.patch.object(BaseTaskNew, "process_metadata")
-        mock_save_data = mocker.patch.object(BaseTaskNew, "save_data_to_disk")
         mock_teardown_manager = mocker.patch.object(BaseTaskNew, "teardown_manager_hdf5")
 
         filename = mock_task_class.run()
@@ -205,7 +204,6 @@ class TestBaseTaskNew:
         assert mock_setup_manager.called
         assert mock_load_data.called
         assert mock_process.called
-        assert mock_save_data.called
         assert mock_teardown_manager.called
         assert filename == mock_task_class.hdf5_filepath
 
@@ -216,9 +214,9 @@ class TestBaseTaskNew:
         mock_task_class.load_data()
 
     def test_process_metadata(self, mocker, mock_task_class):
-        mock_create_group = mocker.patch.object(BaseTaskNew, "hdf5_create_group", return_value={})
-        mock_set_data = mocker.patch.object(BaseTaskNew, "set_data_fields_to_save")
         mock_save_raw = mocker.patch.object(BaseTaskNew, "save_raw_metadata_to_hdf5")
+        mock_process_metadata = mocker.patch.object(BaseTaskNew, "process_metadata_fields")
+        mock_save_fields = mocker.patch.object(BaseTaskNew, "save_fields_to_hdf5")
 
         def sample_generator():
             yield {'train': ['dummy', 'data']}
@@ -227,43 +225,21 @@ class TestBaseTaskNew:
 
         mock_task_class.process_metadata(generator)
 
+        assert mock_save_raw.called
+        assert mock_process_metadata.called
+        assert mock_save_fields.called
+
+    def test_save_raw_metadata_to_hdf5(self, mocker, mock_task_class):
+        mock_create_group = mocker.patch.object(BaseTaskNew, "hdf5_create_group", return_value={'dummy': 'object'})
+        mock_save_raw = mocker.patch.object(BaseTaskNew, "save_raw_metadata")
+
+        mock_task_class.save_raw_metadata_to_hdf5({'dummy': 'data'}, 'train')
+
         assert mock_create_group.called
-        assert mock_set_data.called
         assert mock_save_raw.called
 
     def test_hdf5_create_group(self, mocker, mock_task_class):
         pass  # Todo
 
-    def test_set_data_fields_to_save(self, mocker, mock_task_class):
-        hdf5_manager = {}
-        data = ['dummy', 'data']
-        set_name = 'sample_set'
-
-        mock_task_class.set_data_fields_to_save(hdf5_manager, data, set_name)
-
-    def test_set_data_fields_to_save__raises_error_no_input_args(self, mocker, mock_task_class):
-        with pytest.raises(TypeError):
-            mock_task_class.set_data_fields_to_save()
-
-    def test_set_data_fields_to_save__raises_error_missing_one_input_arg(self, mocker, mock_task_class):
-        with pytest.raises(TypeError):
-            mock_task_class.set_data_fields_to_save({}, ['dummy', 'data'])
-
-    def test_save_raw_metadata_to_hdf5(self, mocker, mock_task_class):
-        hdf5_manager = {}
-        data = ['dummy', 'data']
-        set_name = 'sample_set'
-
-        mock_task_class.save_raw_metadata_to_hdf5(hdf5_manager, data, set_name)
-
-    def test_save_raw_metadata_to_hdf5__raises_error_no_input_args(self, mocker, mock_task_class):
-        with pytest.raises(TypeError):
-            mock_task_class.save_raw_metadata_to_hdf5()
-
-    def test_save_raw_metadata_to_hdf5__raises_error_missing_one_input_arg(self, mocker, mock_task_class):
-        with pytest.raises(TypeError):
-            mock_task_class.save_raw_metadata_to_hdf5({}, ['dummy', 'data'])
-
-    def test_save_data_to_disk(self, mocker, mock_task_class):
-        pass
-
+    def test_save_fields_to_hdf5(self, mocker, mock_task_class):
+        pass  # TODO
