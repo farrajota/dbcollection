@@ -50,3 +50,22 @@ def hdf5_write_data(h5_handler, field_name, data, dtype=None, chunks=True,
                                          compression_opts=compression_opts,
                                          fillvalue=fillvalue)
     return h5_field
+
+
+class HDF5Manager(object):
+    """HDF5 metadata file manager.
+
+    Parameters
+    ----------
+    filename : str
+        File name + path of the HDF5 file.
+
+    Arguments
+    ---------
+    filename : str
+        File name + path of the HDF5 file.
+
+    """
+    def __init__(self, filename):
+        assert filename, "Must insert a valid file name."
+        self.filename = filename
