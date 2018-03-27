@@ -52,7 +52,7 @@ class TestBaseDatasetNew:
         assert db_manager.tasks == {}
         assert db_manager.default_task == ''
 
-    def test_init_withouth_optional_input_args(self, mocker):
+    def test_init_without_optional_input_args(self, mocker):
         data_path = '/path/to/data'
         cache_path = '/path/to/cache'
 
@@ -162,7 +162,7 @@ class TestBaseTaskNew:
         assert task_manager.filename_h5 == ''
         assert task_manager.hdf5_manager == None
 
-    def test_init_withouth_optional_input_args(self, mocker):
+    def test_init_without_optional_input_args(self, mocker):
         mock_get_filename = mocker.patch.object(BaseTaskNew, "get_hdf5_save_filename", return_value='/path/to/hdf5/file.h5')
         data_path = '/path/to/data'
         cache_path = '/path/to/cache'
@@ -194,10 +194,10 @@ class TestBaseTaskNew:
         assert filepath == os.path.join('/path/to/cache', 'classification.h5')
 
     def test_run(self, mocker, mock_task_class):
-        mock_setup_manager = mocker.patch.object(BaseTaskNew, "setup_manager_hdf5")
+        mock_setup_manager = mocker.patch.object(BaseTaskNew, "setup_hdf5_manager")
         mock_load_data = mocker.patch.object(BaseTaskNew, "load_data", return_value={})
         mock_process = mocker.patch.object(BaseTaskNew, "process_metadata")
-        mock_teardown_manager = mocker.patch.object(BaseTaskNew, "teardown_manager_hdf5")
+        mock_teardown_manager = mocker.patch.object(BaseTaskNew, "teardown_hdf5_manager")
 
         filename = mock_task_class.run()
 
@@ -206,9 +206,6 @@ class TestBaseTaskNew:
         assert mock_process.called
         assert mock_teardown_manager.called
         assert filename == mock_task_class.hdf5_filepath
-
-    def test_setup_manager_hdf5(self, mocker, mock_task_class):
-        pass  # Todo
 
     def test_load_data(self, mocker, mock_task_class):
         mock_task_class.load_data()
