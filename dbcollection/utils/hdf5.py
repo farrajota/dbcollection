@@ -76,3 +76,6 @@ class HDF5Manager(object):
         """Opens/creates an HDF5 file in disk."""
         assert filename
         return h5py.File(filename, 'w', libver='latest')
+
+    def close(self):
+        self.file.close()
