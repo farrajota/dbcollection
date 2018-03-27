@@ -11,6 +11,7 @@ from __future__ import print_function
 import os
 import h5py
 
+from dbcollection.utils.hdf5 import HDF5Manager
 from dbcollection.utils.url import download_extract_all
 
 
@@ -484,7 +485,7 @@ class BaseTaskNew(object):
         """Sets up the metadata manager to store the processed data to disk."""
         if self.verbose:
             print('\n==> Storing metadata to file: {}'.format(self.hdf5_filepath))
-        self.hdf5_manager = None
+        self.hdf5_manager = HDF5Manager(filename=self.hdf5_filepath)
 
     def load_data(self):
         """Loads the dataset's (meta)data from disk (create a generator).
