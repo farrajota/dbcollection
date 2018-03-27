@@ -3,6 +3,7 @@ hdf5 utility functions.
 """
 
 
+import h5py
 import numpy as np
 
 
@@ -69,3 +70,9 @@ class HDF5Manager(object):
     def __init__(self, filename):
         assert filename, "Must insert a valid file name."
         self.filename = filename
+        self.file = self.open_file(filename)
+
+    def open_file(self, filename):
+        """Opens/creates an HDF5 file in disk."""
+        assert filename
+        return h5py.File(filename, 'w', libver='latest')
