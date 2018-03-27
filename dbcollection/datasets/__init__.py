@@ -475,13 +475,13 @@ class BaseTaskNew(object):
         str
             File name + path of the task's HDF5 metadata file.
         """
-        self.setup_manager_hdf5()
+        self.setup_hdf5_manager()
         data_generator = self.load_data()
         self.process_metadata(data_generator)
-        self.teardown_manager_hdf5()
+        self.teardown_hdf5_manager()
         return self.hdf5_filepath
 
-    def setup_manager_hdf5(self):
+    def setup_hdf5_manager(self):
         """Sets up the metadata manager to store the processed data to disk."""
         if self.verbose:
             print('\n==> Storing metadata to file: {}'.format(self.hdf5_filepath))
@@ -591,6 +591,6 @@ class BaseTaskNew(object):
         """
         pass  # TODO
 
-    def teardown_manager_hdf5(self):
+    def teardown_hdf5_manager(self):
         """Sets up the MetadataManager object to manage the metadata save process to disk."""
         self.hdf5_manager.close()
