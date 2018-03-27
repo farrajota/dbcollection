@@ -4,6 +4,7 @@ Test the HDF5 metadata manager class.
 
 
 import os
+import numpy as np
 import pytest
 
 from dbcollection.utils.hdf5 import HDF5Manager
@@ -62,3 +63,22 @@ class TestHDF5Manager:
         with pytest.raises(TypeError):
             mock_hdf5manager.exists_group()
 
+    def test_add_field_to_group(self, mocker, mock_hdf5manager):
+        mock_group = mocker.patch.object(HDF5Manager, "get_group", return_value=mocker.MagicMock())
+
+        mock_hdf5manager.add_field_to_group(
+            group='train',
+            field='classes',
+            data=np.random.rand(5,5),
+            dtype=np.uint8,
+            fillvalue=0,
+            chunks=True,
+            compression='gzip',
+            compression_opts=4
+        )
+
+        assert mock_group.called
+
+    def test_add_field_to_group__raises_error_no_input_args(self, mocker, mock_hdf5manager):
+        with pytest.raises(TypeError):
+            mock_hdf5manager.add_field_to_group()
