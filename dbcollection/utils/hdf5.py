@@ -79,3 +79,7 @@ class HDF5Manager(object):
 
     def close(self):
         self.file.close()
+
+    def exists_group(self, group):
+        assert group, "Must input a valid group name."
+        return group in self.file
