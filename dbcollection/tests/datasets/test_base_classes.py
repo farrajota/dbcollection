@@ -5,6 +5,7 @@ Test the base classes for managing datasets and tasks.
 
 import os
 import pytest
+import numpy as np
 
 from dbcollection.datasets import BaseDatasetNew, BaseTaskNew
 
@@ -239,4 +240,42 @@ class TestBaseTaskNew:
         pass  # Todo
 
     def test_save_fields_to_hdf5(self, mocker, mock_task_class):
-        pass  # TODO
+        mock_add_data = mocker.patch.object(BaseTaskNew, "add_field_data_to_hdf5")
+        set_name = 'train'
+        fields = {
+            "fieldA": "dummy_dataA",
+            "fieldB": "dummy_dataB",
+            "fieldC": "dummy_dataC",
+        }
+
+        mock_task_class.save_fields_to_hdf5(fields, set_name)
+
+        assert mock_add_data.called
+        assert mock_add_data.call_count == len(fields)
+
+    def test_add_field_data_to_hdf5(self, mocker, mock_task_class):
+        mock_add_field = mocker.Mock()
+        mock_task_class.hdf5_manager = mock_add_field
+
+        group = 'train'
+        field = 'fieldA'
+        data = {
+            "data": np.array(range(10)),
+            "dtype": np.uint8,
+            "fillvalue": 0,
+            "chunks": True,
+            "compression": "gzip",
+            "compression_opts": 4
+        }
+        mock_task_class.add_field_data_to_hdf5(group, field, data)
+
+        mock_add_field.add_field_to_group.assert_called_once_with(
+            group='train',
+            field='fieldA',
+            data=data['data'],
+            dtype=data['dtype'],
+            fillvalue=data['fillvalue'],
+            chunks=data['chunks'],
+            compression=data['compression'],
+            compression_opts=data['compression_opts'],
+        )
