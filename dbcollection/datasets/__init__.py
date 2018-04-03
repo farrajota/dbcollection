@@ -589,7 +589,22 @@ class BaseTaskNew(object):
             Name of the set split.
 
         """
-        pass  # TODO
+        for field in fields:
+            data = fields[field]
+            # TODO: check if the data is a method or a tuple/list/np.ndarray
+            self.add_field_data_to_hdf5(set_name, field, data)
+
+    def add_field_data_to_hdf5(self, group, field, data):
+        self.hdf5_manager.add_field_to_group(
+            group=group,
+            field=field,
+            data=data['data'],
+            dtype=data['dtype'],
+            fillvalue=data['fillvalue'],
+            chunks=data['chunks'],
+            compression=data['compression'],
+            compression_opts=data['compression_opts'],
+        )
 
     def teardown_hdf5_manager(self):
         """Sets up the MetadataManager object to manage the metadata save process to disk."""
