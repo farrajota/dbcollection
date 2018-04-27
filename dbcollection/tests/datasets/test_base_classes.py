@@ -212,9 +212,7 @@ class TestBaseTaskNew:
         mock_task_class.load_data()
 
     def test_process_metadata(self, mocker, mock_task_class):
-        mock_save_raw = mocker.patch.object(BaseTaskNew, "save_raw_metadata_to_hdf5")
-        mock_process_metadata = mocker.patch.object(BaseTaskNew, "process_metadata_fields")
-        mock_save_fields = mocker.patch.object(BaseTaskNew, "save_fields_to_hdf5")
+        mock_process_metadata = mocker.patch.object(BaseTaskNew, "process_set_metadata")
 
         def sample_generator():
             yield {'train': ['dummy', 'data']}
@@ -223,59 +221,48 @@ class TestBaseTaskNew:
 
         mock_task_class.process_metadata(generator)
 
-        assert mock_save_raw.called
         assert mock_process_metadata.called
-        assert mock_save_fields.called
-
-    def test_save_raw_metadata_to_hdf5(self, mocker, mock_task_class):
-        mock_create_group = mocker.patch.object(BaseTaskNew, "hdf5_create_group", return_value={'dummy': 'object'})
-        mock_save_raw = mocker.patch.object(BaseTaskNew, "save_raw_metadata")
-
-        mock_task_class.save_raw_metadata_to_hdf5({'dummy': 'data'}, 'train')
-
-        assert mock_create_group.called
-        assert mock_save_raw.called
 
     def test_hdf5_create_group(self, mocker, mock_task_class):
         pass  # Todo
 
-    def test_save_fields_to_hdf5(self, mocker, mock_task_class):
-        mock_add_data = mocker.patch.object(BaseTaskNew, "add_field_data_to_hdf5")
-        set_name = 'train'
-        fields = {
-            "fieldA": "dummy_dataA",
-            "fieldB": "dummy_dataB",
-            "fieldC": "dummy_dataC",
-        }
-
-        mock_task_class.save_fields_to_hdf5(fields, set_name)
-
-        assert mock_add_data.called
-        assert mock_add_data.call_count == len(fields)
-
-    def test_add_field_data_to_hdf5(self, mocker, mock_task_class):
+    def test_save_field_to_hdf5(self, mocker, mock_task_class):
         mock_add_field = mocker.Mock()
         mock_task_class.hdf5_manager = mock_add_field
 
         group = 'train'
         field = 'fieldA'
-        data = {
-            "data": np.array(range(10)),
-            "dtype": np.uint8,
-            "fillvalue": 0,
-            "chunks": True,
-            "compression": "gzip",
-            "compression_opts": 4
-        }
-        mock_task_class.add_field_data_to_hdf5(group, field, data)
+        data = np.array(range(10))
+        mock_task_class.save_field_to_hdf5(group, field, data)
 
         mock_add_field.add_field_to_group.assert_called_once_with(
             group='train',
             field='fieldA',
-            data=data['data'],
-            dtype=data['dtype'],
-            fillvalue=data['fillvalue'],
-            chunks=data['chunks'],
-            compression=data['compression'],
-            compression_opts=data['compression_opts'],
+            data=data
+        )
+
+    def test_save_field_to_hdf5_all_args(self, mocker, mock_task_class):
+        mock_add_field = mocker.Mock()
+        mock_task_class.hdf5_manager = mock_add_field
+
+        data = np.array(range(10))
+        mock_task_class.save_field_to_hdf5(
+            set_name='train',
+            field='fieldA',
+            data=data,
+            dtype=np.uint8,
+            fillvalue=0,
+            chunks=True,
+            compression="gzip",
+            compression_opts=4)
+
+        mock_add_field.add_field_to_group.assert_called_once_with(
+            group='train',
+            field='fieldA',
+            data=data,
+            dtype=np.uint8,
+            fillvalue=0,
+            chunks=True,
+            compression="gzip",
+            compression_opts=4
         )
