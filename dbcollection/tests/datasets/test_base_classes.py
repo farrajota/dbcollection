@@ -266,3 +266,11 @@ class TestBaseTaskNew:
             compression="gzip",
             compression_opts=4
         )
+
+    def test_teardown_hdf5_manager(self, mocker, mock_task_class):
+        mock_add_field = mocker.Mock()
+        mock_task_class.hdf5_manager = mock_add_field
+
+        mock_task_class.teardown_hdf5_manager()
+
+        mock_add_field.close.assert_called_once_with()
