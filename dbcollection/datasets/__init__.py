@@ -508,56 +508,10 @@ class BaseTaskNew(object):
             for set_name in data:
                 if self.verbose:
                     print('\nSaving set metadata: {}'.format(set_name))
-                self.save_raw_metadata_to_hdf5(data[set_name], set_name)
-                fields = self.process_metadata_fields(data[set_name], set_name)
-                self.save_fields_to_hdf5(fields, set_name)
+                self.process_set_metadata(data[set_name], set_name)
 
-    def save_raw_metadata_to_hdf5(self, data, set_name):
-        """Saves the dataset's metadata in its raw (original) format inside the HDF5 file.
-
-        Most datasets are set as nested trees of files + directories.
-        Here, the metadata of a dataset is stored in this fashion,
-        closely following the tree structure of the data.
-
-        Parameters
-        ----------
-        data : dict
-            Dictionary containing the data annotations of a set split.
-        set_name : str
-            Name of the set split.
-
-        """
-        group_raw = self.hdf5_create_group(set_name + '/raw')
-        self.save_raw_metadata(group_raw, data, set_name)
-
-    def hdf5_create_group(self, group_name):
-        """Creates a group in the HDF5 file.
-
-        Parameters
-        ----------
-        group_name : str
-            Name of the group to be created in the HDF5 file.
-
-        """
-        pass
-
-    def save_raw_metadata(self, hdf5_handler, data, set_name):
-        """Saves the dataset's metadata in the raw (original) format.
-
-        Parameters
-        ----------
-        hdf5_handler : h5py._hl.group.Group
-            hdf5 group object handler.
-        data : dict
-            Dictionary containing the data annotations of a set split.
-        set_name : str
-            Name of the set split.
-
-        """
-        pass  # stub
-
-    def process_metadata_fields(self, data, set_name):
-        """Sets up which data fields to be saved in the HDF5 metadata file.
+    def process_set_metadata(self, data, set_name):
+        """Sets up the set's data fields to be stored in the HDF5 metadata file.
 
         All fields set in this method are organized as a single big matrix.
         This results in much faster data retrieval than by transversing nested
@@ -570,29 +524,8 @@ class BaseTaskNew(object):
         set_name : str
             Name of the set split.
 
-        Returns
-        -------
-        dict
-            Dictionary with the field names as keys and the metadata as the respective value.
-
         """
-        pass  # stub
-
-    def save_fields_to_hdf5(self, fields, set_name):
-        """Saves the metadata of the processed fields to the HDF5 file for a set split.
-
-        Parameters
-        ----------
-        fields : dict
-            Dictionary containing fields with respective metadata annotations of a set split.
-        set_name : str
-            Name of the set split.
-
-        """
-        for field in fields:
-            data = fields[field]
-            # TODO: check if the data is a method or a tuple/list/np.ndarray
-            self.add_field_data_to_hdf5(set_name, field, data)
+        pass
 
     def add_field_data_to_hdf5(self, group, field, data):
         self.hdf5_manager.add_field_to_group(
