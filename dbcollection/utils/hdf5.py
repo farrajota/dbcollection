@@ -90,8 +90,8 @@ class HDF5Manager(object):
         assert name, "Must input a name for the group."
         self.file.create_group(name)
 
-    def add_field_to_group(self, group, field, data, dtype, fillvalue,
-                           chunks, compression, compression_opts):
+    def add_field_to_group(self, group, field, data, dtype=None, fillvalue=-1, chunks=True,
+                           compression="gzip", compression_opts=4):
         """Writes the data of a field into an HDF5 file.
 
         Parameters
@@ -102,15 +102,15 @@ class HDF5Manager(object):
             Name of the field (h5 dataset).
         data : np.ndarray
             Data array.
-        dtype : np.dtype
+        dtype : np.dtype, optional
             Data type.
-        chunks : bool
+        chunks : bool, optional
             Stores the data as chunks if True.
-        compression : str
+        compression : str, optional
             Compression algorithm type.
-        compression_opts : int
+        compression_opts : int, optional
             Compression option (range: [1,10])
-        fillvalue : int/float
+        fillvalue : int/float, optional
             Value to pad the data array.
 
         Returns
@@ -129,6 +129,9 @@ class HDF5Manager(object):
         assert compression_opts, "Must input a valid compression value."
 
         h5_group = self.get_group(group)
+
+        if dtype is None:
+            dtype = data.dtype
 
         h5_field = h5_group.create_dataset(
             name=field,
