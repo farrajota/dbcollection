@@ -181,4 +181,4 @@ class DownloadAPI(object):
         self.cache_manager.dataset.update(self.name, data_dir=data_dir)
 
     def add_dataset_info_to_cache(self, data_dir):
-        self.cache_manager.dataset.add(self.name, data_dir=self.save_data_dir, tasks={})
+        self.cache_manager.dataset.add(self.name, data_dir=self.data_dir, tasks={})
