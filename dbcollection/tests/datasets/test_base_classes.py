@@ -39,10 +39,12 @@ class TestBaseDatasetNew:
         extract_data=True
         verbose=True
 
-        db_manager = BaseDatasetNew(data_path=data_path,
-                                 cache_path=cache_path,
-                                 extract_data=extract_data,
-                                 verbose=verbose)
+        db_manager = BaseDatasetNew(
+            data_path=data_path,
+            cache_path=cache_path,
+            extract_data=extract_data,
+            verbose=verbose
+        )
 
         assert db_manager.data_path == '/path/to/data'
         assert db_manager.cache_path == '/path/to/cache'
@@ -57,8 +59,10 @@ class TestBaseDatasetNew:
         data_path = '/path/to/data'
         cache_path = '/path/to/cache'
 
-        db_manager = BaseDatasetNew(data_path=data_path,
-                                 cache_path=cache_path)
+        db_manager = BaseDatasetNew(
+            data_path=data_path,
+            cache_path=cache_path
+        )
 
         assert db_manager.data_path == '/path/to/data'
         assert db_manager.cache_path == '/path/to/cache'
@@ -82,7 +86,12 @@ class TestBaseDatasetNew:
 
         mock_dataset_class.download()
 
-        assert mock_download_extract.called
+        assert mock_download_extract.called_once_with(
+            urls=mock_dataset_class.urls,
+            dir_save=mock_dataset_class.data_path,
+            extract_data=mock_dataset_class.extract_data,
+            verbose=mock_dataset_class.verbose
+        )
 
     def test_process(self, mocker, mock_dataset_class):
         mock_parse_task = mocker.patch.object(BaseDatasetNew, "parse_task_name", return_value='taskA')
