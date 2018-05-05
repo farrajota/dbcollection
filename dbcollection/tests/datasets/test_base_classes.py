@@ -92,7 +92,7 @@ class TestBaseDatasetNew:
 
         assert mock_parse_task.called
         assert mock_process_metadata.called
-        assert result == {'taskA': '/path/to/task/filename.h5'}
+        assert result == {'taskA': {"filename": '/path/to/task/filename.h5', "categories": ()}}
 
     def test_parse_task_name_with_valid_task_name(self, mocker, mock_dataset_class):
         task = 'taskA'
