@@ -162,7 +162,7 @@ class LoadAPI(object):
         self.cache_manager.manager.reload_cache()
 
     def dataset_task_metadata_exists_in_cache(self):
-        return self.cache_manager.task.exists(self.name, self.task)
+        return self.cache_manager.task.exists(task=self.task, name=self.name)
 
     def process_dataset_task_metadata(self):
         self.process_dataset()
