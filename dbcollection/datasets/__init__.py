@@ -240,7 +240,7 @@ class BaseDatasetNew(object):
         if self.verbose:
             print("\nProcessing '{}' task:".format(task_))
         hdf5_filename = self.process_metadata(task_)
-        return {task_: hdf5_filename}
+        return {task_: {"filename": hdf5_filename, "categories": self.keywords}}
 
     def parse_task_name(self, task):
         """Parses the task name to a valid name."""
