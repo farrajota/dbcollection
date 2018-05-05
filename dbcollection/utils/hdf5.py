@@ -88,7 +88,7 @@ class HDF5Manager(object):
     def create_group(self, name):
         """Creates a group in the file."""
         assert name, "Must input a name for the group."
-        self.file.create_group(name)
+        return self.file.create_group(name)
 
     def add_field_to_group(self, group, field, data, dtype=None, fillvalue=-1, chunks=True,
                            compression="gzip", compression_opts=4):
