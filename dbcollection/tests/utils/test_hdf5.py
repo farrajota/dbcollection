@@ -19,7 +19,7 @@ def test_data():
 
 @pytest.fixture()
 def mock_hdf5manager(mocker, test_data):
-    mock_open_file = mocker.patch.object(HDF5Manager, "open_file", return_value={'test_group': 'dummy_data'})
+    mocker.patch.object(HDF5Manager, "open_file", return_value={'test_group': 'dummy_data'})
     return HDF5Manager(
         filename=test_data["filename"]
     )
